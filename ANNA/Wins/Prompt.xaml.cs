@@ -33,6 +33,7 @@ namespace ANNA.Wins
         private void OKButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             DialogResult = true;
+            
         }
     }
 }

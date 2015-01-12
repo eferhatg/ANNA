@@ -187,37 +187,68 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                     
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <Grid Margin="5" ShowGridLines="True" Grid.Column="0" Grid.Row="0">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
+                        
+                       
 
-                            </Grid.ColumnDefinitions>
-
-                            <Button Name="StartLearning" Content="Eğitimi Başlat" Grid.Column="0" Grid.Row="0" Margin="5,5,5,5" Click="StartLearning_Click"/>
-                            </Grid>
-                        <Grid Margin="5" ShowGridLines="True" Grid.Column="1" Grid.Row="0">
+                            <Button Name="StartLearning" Content="Eğitimi Başlat" Width="100" Grid.Column="0" Grid.Row="0" Margin="5,5,5,5" Click="StartLearning_Click"/>
+                            
+                        <Grid Margin="5" ShowGridLines="True" Grid.Column="0" Grid.Row="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="300"/>
-                                <RowDefinition Height="400"/>
+                                <RowDefinition Height="100"/>
+                                <RowDefinition Height="250"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="700"/>
+                                <ColumnDefinition Width="840"/>
                                
                             </Grid.ColumnDefinitions>
 
-                            <oxy:Plot Name="Plot1" Title="Hata" Width="Auto" Model="{Binding ErrorPlotModel}" Grid.Column="0" Grid.Row="0" Margin="10" >
-                        </oxy:Plot>
-                            <oxy:Plot Name="Plot2" Title="Nöron" Width="Auto" Model="{Binding NeuronPlotModel}" Grid.Column="0" Grid.Row="1" Margin="10" >
-                            </oxy:Plot>
+                            <oxy:Plot Name="Plot1" Title="Hata" Width="Auto" Model="{Binding ErrorPlotModel}" Grid.Column="0" Grid.Row="0" Margin="10" ></oxy:Plot>
+                            <ScrollViewer  Grid.Row="1"  HorizontalScrollBarVisibility="Visible" >
+                                <ListBox x:Name="StackListLayer">
+                                    
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                         
+
+                                </ListBox>
+                                
+                            
+                            </ScrollViewer>
+
+                            <Grid Margin="5" ShowGridLines="True" Grid.Column="0" Grid.Row="2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="250"/>
+                                       
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="275"/>
+                                    <ColumnDefinition Width="275"/>
+                                    <ColumnDefinition Width="275"/>
+                                </Grid.ColumnDefinitions>
+                            
+                                <GroupBox Grid.Column="0" Grid.Row="0" Name="GrpError" Header="Anlık Hata" >
+                                    <ListBox Name="LstError" MaxHeight="230"   MinHeight="220"    ScrollViewer.VerticalScrollBarVisibility="Visible" /> 
+                                </GroupBox>
+                                <GroupBox Grid.Column="1" Grid.Row="0" Name="GrpAvgError" Header="Ortalama Hata" >
+                                    <ListBox Name="LstAvgError" MaxHeight="230"   MinHeight="220"    ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                </GroupBox>
+                                <GroupBox Grid.Column="2" Grid.Row="0" Name="GrpMsError" Header="Karekök Ortalama Hata" >
+                                    <ListBox Name="LstMsError" MaxHeight="230"   MinHeight="220"    ScrollViewer.VerticalScrollBarVisibility="Visible" />
+                                </GroupBox>
+
+                            </Grid>
+                          
+
                         </Grid>
                     </Grid>
                 </TabItem.Content>

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ANNA.Wins.Main"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Main" Width="579.2" Height="319.2">
+        Title="Main" Width="579.2" Height="319.2" Activated="Window_Activated">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -45,6 +45,19 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <Button Click="NewConfigButton_Click" Grid.Column="0" Margin="0,5,5,5"  Grid.Row="1" Content="Yeni Ekle" HorizontalAlignment="Right" Name="NewConfigButton" Width="100"/>
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+             
+
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button  Grid.Column="0" Margin="5,5,5,5"  Grid.Row="0" Content="Güncelle" HorizontalAlignment="Right" Name="UpdateButton" Width="100" Click="UpdateButton_Click"/>
+            <Button Click="NewConfigButton_Click" Grid.Column="1" Margin="5,5,5,5"  Grid.Row="0" Content="Yeni Ekle" HorizontalAlignment="Right" Name="NewConfigButton" Width="100"/>
+        </Grid>
+       
     </Grid>
 </Window>

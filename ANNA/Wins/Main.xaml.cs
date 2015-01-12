@@ -42,14 +42,23 @@ namespace ANNA.Wins
             if (mbr == MessageBoxResult.OK)
             {
                 var networkConfiguration = ((Hyperlink)sender).DataContext as NetworkConfiguration;
-                if (networkConfiguration != null)
+                if (networkConfiguration != null && networkConfiguration.FilePath != null)
+                {
                     File.Delete(networkConfiguration.FilePath);
+                    File.Delete(networkConfiguration.AnalystFilePath);
+                    File.Delete(networkConfiguration.EvalNormPath);
+                    File.Delete(networkConfiguration.TrainedNetworkFilePath);
+                    File.Delete(networkConfiguration.TrainedNormPath);
+                    var testss = NetworkConfiguration.GetFromFile();
+                    ConfigDataGrid.ItemsSource = null;
+                    ConfigDataGrid.ItemsSource = testss;
+                }
             }
         }
 
         private void KullanLink_Click(object sender, RoutedEventArgs e)
         {
-            var cf = new Analyze();
+            var cf = new Analyze(((Hyperlink)sender).DataContext as NetworkConfiguration);
             cf.Show();
         }
 
@@ -57,6 +66,18 @@ namespace ANNA.Wins
         {
             var cf = new Learn();
             cf.Show();
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+              
+        }
+
+        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            var testss = NetworkConfiguration.GetFromFile();
+            ConfigDataGrid.ItemsSource = null;
+            ConfigDataGrid.ItemsSource = testss;
         }
     }
 }

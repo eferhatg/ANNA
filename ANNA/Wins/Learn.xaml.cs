@@ -9,6 +9,7 @@ using Encog.App.Analyst;
 using Encog.App.Analyst.CSV.Normalize;
 using Encog.App.Analyst.CSV.Segregate;
 using Encog.App.Analyst.CSV.Shuffle;
+using Encog.App.Analyst.Script.Normalize;
 using Encog.App.Analyst.Wizard;
 using Encog.Engine.Network.Activation;
 using Encog.ML.Data;
@@ -27,6 +28,8 @@ using Encog.Util.CSV;
 using Encog.Util.Normalize;
 using Encog.Util.Normalize.Input;
 using Encog.Util.Simple;
+using OxyPlot;
+using FontWeights = System.Windows.FontWeights;
 
 namespace ANNA.Wins
 {
@@ -44,11 +47,7 @@ namespace ANNA.Wins
 
             _nc = new NetworkConfiguration();
             _nc.NetworkLayers = new List<NetworkLayer>();
-            errorViewModel = new ErrorViewModel();
-            CompositionTarget.Rendering += CompositionTargetRendering;
             InitializeComponent();
-            Plot1.DataContext = errorViewModel;
-            Plot2.DataContext = errorViewModel;
             InitWindow();
 
         }
@@ -56,11 +55,7 @@ namespace ANNA.Wins
         {
             _loadTag = true;
             _nc = nc;
-            errorViewModel = new ErrorViewModel();
-            CompositionTarget.Rendering += CompositionTargetRendering;
             InitializeComponent();
-            Plot1.DataContext = errorViewModel;
-            Plot2.DataContext = errorViewModel;
             InitWindow();
             BindControls();
 
@@ -68,9 +63,9 @@ namespace ANNA.Wins
 
         public void BindControls()
         {
-            
+
             UpDownHiddenLayer.Value = _nc.NetworkLayers.Count;
-       
+
             DataGridHiddenLayers.ItemsSource = null;
             DataGridHiddenLayers.ItemsSource = _nc.NetworkLayers;
             ComboboxLearningAlgorithm.SelectedValue = _nc.LearnConfig.Algorithm;
@@ -82,7 +77,7 @@ namespace ANNA.Wins
             {
                 ComboboxNetworkType.SelectedIndex = 1;
             }
-          
+
             UpDownLearningRate.Value = Convert.ToDecimal(_nc.LearnConfig.LearningRate);
             UpDownMaximumError.Value = Convert.ToDecimal(_nc.LearnConfig.MaximumError);
             UpDownIteration.Value = _nc.LearnConfig.IterationCount;
@@ -90,6 +85,7 @@ namespace ANNA.Wins
             UpDownAvarageError.Value = Convert.ToDecimal(_nc.LearnConfig.AvarageError);
             CheckBoxLimitedWithAvarageError.IsChecked = _nc.LearnConfig.LimitedWithAvarageError;
             CheckBoxLimitedWithMaximumError.IsChecked = _nc.LearnConfig.LimitedWithMaximumError;
+
             _loadTag = false;
         }
 
@@ -109,6 +105,8 @@ namespace ANNA.Wins
             ComboBoxDelimeter.DisplayMemberPath = "Name";
             ComboBoxDelimeter.ItemsSource = DelimeterList;
             ComboBoxDelimeter.SelectedIndex = 0;
+
+
         }
 
 
@@ -149,30 +147,30 @@ namespace ANNA.Wins
 
         private void ComboboxNetworkType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
-                if (e.AddedItems.Count > 0)
-                {
-                    var comboBoxItem = e.AddedItems[0] as ComboBoxItem;
-                    if (comboBoxItem == null || DataGridHiddenLayers == null || UpDownHiddenLayer == null)
-                    {
-                        return;
-                    }
-                    string tag = comboBoxItem.Tag as string;
-                    if (tag == "RBF")
-                    {
-                        _nc.NetworkLayers.Clear();
-                        UpDownHiddenLayer.Value = 0;
-                        UpDownHiddenLayer.IsEnabled = false;
 
-                        DataGridHiddenLayers.ItemsSource = null;
-                        _justRendered = true;
-                    }
-                    else
-                    {
-                        UpDownHiddenLayer.IsEnabled = true;
-                    }
+            if (e.AddedItems.Count > 0)
+            {
+                var comboBoxItem = e.AddedItems[0] as ComboBoxItem;
+                if (comboBoxItem == null || DataGridHiddenLayers == null || UpDownHiddenLayer == null)
+                {
+                    return;
                 }
-          
+                string tag = comboBoxItem.Tag as string;
+                if (tag == "RBF")
+                {
+                    _nc.NetworkLayers.Clear();
+                    UpDownHiddenLayer.Value = 0;
+                    UpDownHiddenLayer.IsEnabled = false;
+
+                    DataGridHiddenLayers.ItemsSource = null;
+                    _justRendered = true;
+                }
+                else
+                {
+                    UpDownHiddenLayer.IsEnabled = true;
+                }
+            }
+
 
         }
 
@@ -229,10 +227,10 @@ namespace ANNA.Wins
             DataGridNormalization.ItemsSource = _nrmParams;
 
             //  Sütun başlığı varsa, siliniyor.
-       
-                var lines = File.ReadAllLines(Config.TrainingFile.FullName);
-                File.WriteAllLines(Config.TrainingFile.FullName, lines);
-      
+
+            var lines = File.ReadAllLines(Config.TrainingFile.FullName);
+            File.WriteAllLines(Config.TrainingFile.FullName, lines);
+
             ButtonNormilizeFile.IsEnabled = true;
 
         }
@@ -336,16 +334,19 @@ namespace ANNA.Wins
             {
                 wizard.TargetFieldName = outputname;
             }
+          
             wizard.Wizard(Config.TrainingFile, _hasHeader, AnalystFileFormat.DecpntComma);
+             _nc.NormalizationActions= new NormalizationAction[_nrmParams.Count];
             for (var i = 0; i < _nrmParams.Count; i++)
             {
+                _nc.NormalizationActions[i] = NormalizationAction.Ignore;
                 NormalizationAction na;
                 if (_nrmParams[i].DataType != "Yoksay")
                 {
                     switch (_nrmParams[i].ColType)
                     {
-                         
-                                case "Olduğu Gibi":
+
+                        case "Olduğu Gibi":
                             na = NormalizationAction.PassThrough;
                             break;
                         case "Normalizasyon":
@@ -358,6 +359,10 @@ namespace ANNA.Wins
                             na = NormalizationAction.Ignore;
                             break;
                     }
+                  
+                        _nc.NormalizationActions[i] = na;
+                    
+
                 }
                 else
                 {
@@ -370,11 +375,13 @@ namespace ANNA.Wins
             norm.Analyze(Config.TrainingFile, _hasHeader, CSVFormat.English, analyst);
             norm.Normalize(Config.NormalizedTrainingFile);
             analyst.Save(Config.AnalystFile);
+
         }
         private void CreateNetwork()
         {
             var network = new BasicNetwork();
             network.AddLayer(new BasicLayer(null, true, _nrmParams.Count(d => d.DataType.Equals("Giriş"))));
+
             foreach (var networkLayer in _nc.NetworkLayers)
             {
                 switch (networkLayer.ActivationFunction)
@@ -411,7 +418,7 @@ namespace ANNA.Wins
                 }
 
             }
-            network.AddLayer(new BasicLayer(new ActivationTANH(), false, 1));
+            network.AddLayer(new BasicLayer(new ActivationLinear(), false, 1));
             network.Structure.FinalizeStructure();
             network.Reset();
             EncogDirectoryPersistence.SaveObject(Config.TrainedNetworkFile, (BasicNetwork)network);
@@ -439,13 +446,15 @@ namespace ANNA.Wins
                     CheckBoxLimitedWithMaximumError.IsChecked.Value
 
             };
+            _nc.NormalizationParams = _nrmParams;
+            _nc.HasHeaders = _hasHeader;
             CreateNetwork();
-            TrainNetwork();
+
 
 
 
         }
-        
+
         private Propagation train;
         private BasicNetwork network;
         private void TrainNetwork()
@@ -471,7 +480,7 @@ namespace ANNA.Wins
                     train = new ResilientPropagation(network, trainingSet);
                     break;
             }
-            EncogDirectoryPersistence.SaveObject(Config.TrainedNetworkFile, (BasicNetwork)network);
+
         }
         #endregion
 
@@ -493,25 +502,89 @@ namespace ANNA.Wins
             SaveNetworkConfiguration();
             _isReadyToLearn = true;
             TabControlLearn.SelectedIndex = 1;
+        
         }
         private int _epoch = 0;
         private double _maxError = 0;
         private double _avgError = 0;
         private double _totalError = 0;
+        private double _mst = 0;
+        private double _mse = 0;
         bool _plotstart;
+
+
+
         private void StartLearning_Click(object sender, RoutedEventArgs e)
         {
-            errorViewModel.DrawNeurons(train);
+            TrainNetwork();
+
+            _epoch = 0;
+            _maxError = 0;
+            _avgError = 0;
+            _totalError = 0;
+            _mst = 0;
+            _mse = 0;
+            LstAvgError.Items.Clear();
+            LstError.Items.Clear();
+            LstMsError.Items.Clear();
+            StackListLayer.Items.Clear();
+
+            WriteNetworkDetails();
+
+
+            CompositionTarget.Rendering += CompositionTargetRendering;
+            errorViewModel = new ErrorViewModel();
+            Plot1.DataContext = errorViewModel;
+
             _plotstart = true;
             Plot1.InvalidatePlot(true);
-            Plot2.InvalidatePlot(true);
+
         }
 
+        private void WriteNetworkDetails()
+        {
+            var layerCount = train.Network.Flat.LayerCounts.Count();
+            for (int i = (layerCount - 1); i >= 0; i--)
+            {
+                var LayerName = "Gizli";
+                if (layerCount == (i + 1))
+                {
+                    LayerName = "Giriş";
+                }
+                if (i == 0)
+                {
+                    LayerName = "Çıkış";
+                }
+                var neuronCounts = train.Network.Flat.LayerCounts[i];
+                var activationFunc = train.Network.Flat.ActivationFunctions[i].ToString().Split('.')[train.Network.Flat.ActivationFunctions[i].ToString().Split('.').Count()-1];
+                GroupBox gp = new GroupBox();
+                gp.Header = LayerName;
+
+                TextBlock tb = new TextBlock();
+                tb.TextWrapping = TextWrapping.Wrap;
+                tb.Width = 200;
+                tb.Text += "Nöron Sayısı:" + neuronCounts + "\nFonksiyon:" + activationFunc;
+                gp.Content = tb;
+
+                ListBoxItem lbi= new ListBoxItem();
+                lbi.Content = gp;
+                StackListLayer.Items.Add(lbi);
+  
+          
+            }
+
+
+
+
+
+
+
+        }
 
 
         private void CompositionTargetRendering(object sender, EventArgs e)
         {
-            if (_plotstart&&train!=null)
+            if (_plotstart && train != null)
             {
                 errorViewModel.DrawData(new ErrorData()
                 {
@@ -527,17 +600,30 @@ namespace ANNA.Wins
                     Iteration = _epoch,
                     Value = train.Error
                 });
+                errorViewModel.DrawData(new ErrorData()
+                {
+                    ErrorType = "MSE",
+                    TypeIndex = 2,
+                    Iteration = _epoch,
+                    Value = _mse
+                });
                 Plot1.InvalidatePlot(true);
                 train.Iteration();
                 _epoch++;
+                _mst += Math.Pow(train.Error, 2);
+                _mse = _mst / _epoch;
+
                 _maxError = train.Error;
                 _totalError += train.Error;
                 _avgError = _totalError / _epoch;
+                LstError.Items.Add(_epoch.ToString() + ") " + train.Error);
+                LstAvgError.Items.Add(_epoch.ToString() + ") " + _avgError);
+                LstMsError.Items.Add(_epoch.ToString() + ") " + _mse);
 
                 if (_nc.LearnConfig.LimitedWithMaximumError && _maxError < _nc.LearnConfig.MaximumError) FinishTrain(train);
                 if (_nc.LearnConfig.LimitedWithAvarageError && _avgError < _nc.LearnConfig.AvarageError) FinishTrain(train);
                 if (_epoch >= _nc.LearnConfig.IterationCount) FinishTrain(train);
-               
+
             }
 
 
@@ -545,14 +631,18 @@ namespace ANNA.Wins
 
         public void FinishTrain(Propagation trainProp)
         {
+
+            CompositionTarget.Rendering -= CompositionTargetRendering;
             _plotstart = false;
             trainProp.FinishTraining();
             var dialog = new Prompt("Kayıt için bir isim giriniz:");
             if (dialog.ShowDialog() == true)
             {
+
                 _nc.Name = dialog.ResponseText;
-                _nc.WriteToFile();
                 EncogDirectoryPersistence.SaveObject(Config.TrainedNetworkFile, (BasicNetwork)network);
+              
+                _nc.WriteToFile();
             }
 
         }

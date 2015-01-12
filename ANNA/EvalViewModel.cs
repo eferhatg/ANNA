@@ -24,26 +24,21 @@ namespace ANNA
             set { _evalPlotModel = value; OnPropertyChanged("EvalPlotModel"); }
         }
 
-        private PlotModel _neuronModel;
-        public PlotModel NeuronPlotModel
-        {
-            get { return _neuronModel; }
-            set { _neuronModel = value; OnPropertyChanged("NeuronPlotModel"); }
-        }
+      
 
         public EvalViewModel()
         {
             EvalPlotModel = new PlotModel();
-            NeuronPlotModel = new PlotModel();
+       
             SetUpModel();
-            SetUpNeuronModel();
+        
         }
 
         private void SetUpModel()
         {
 
 
-            EvalPlotModel.LegendTitle = "Hata";
+            EvalPlotModel.LegendTitle = "Çıktı";
             EvalPlotModel.LegendOrientation = LegendOrientation.Horizontal;
             EvalPlotModel.LegendPlacement = LegendPlacement.Outside;
             EvalPlotModel.LegendPosition = LegendPosition.TopRight;
@@ -55,22 +50,7 @@ namespace ANNA
             EvalPlotModel.Axes.Add(xAxis);
 
         }
-        private void SetUpNeuronModel()
-        {
-
-
-
-            NeuronPlotModel.LegendOrientation = LegendOrientation.Horizontal;
-            NeuronPlotModel.LegendPlacement = LegendPlacement.Outside;
-            NeuronPlotModel.LegendPosition = LegendPosition.TopRight;
-            NeuronPlotModel.LegendBackground = OxyColor.FromAColor(200, OxyColors.White);
-            NeuronPlotModel.LegendBorder = OxyColors.Black;
-            var yAxis = new LinearAxis(AxisPosition.Left, 0) { MajorGridlineStyle = LineStyle.Solid, MinorGridlineStyle = LineStyle.Dot, Title = "Nöron Dizilimi" };
-            var xAxis = new LinearAxis(AxisPosition.Bottom, 0) { MajorGridlineStyle = LineStyle.Solid, MinorGridlineStyle = LineStyle.Dot, Title = "" };
-            NeuronPlotModel.Axes.Add(yAxis);
-            NeuronPlotModel.Axes.Add(xAxis);
-
-        }
+        
 
         public void DrawData(EvalData evalData)
         {
@@ -90,7 +70,7 @@ namespace ANNA
                     MarkerStroke = Helper.ColorSet[r.Next(0, 5)],
                     MarkerType = randomMarker,
                     CanTrackerInterpolatePoints = false,
-                    Title = string.Format("Hata {0}", evalData.EvalType),
+                    Title = string.Format("{0}", evalData.EvalType),
                     Smooth = false,
                 };
                 EvalPlotModel.Series.Add(lineSerie);
@@ -102,34 +82,6 @@ namespace ANNA
             lineSerie.Points.Add(new DataPoint(evalData.Iteration, evalData.Value));
 
         }
-        public void DrawNeurons(Propagation train)
-        {
-            if (train == null) return;
-            ScatterSeries scatterSeries;
-            if (NeuronPlotModel.Series.Count == 0)
-            {
-                scatterSeries = new ScatterSeries();
-            }
-            else
-            {
-                scatterSeries = NeuronPlotModel.Series[0] as ScatterSeries;
-            }
-            var counter = 0;
-            for (int i = train.Network.Flat.LayerCounts.Length - 1; i >= 0; i--)
-            {
-
-                var multiplier = train.Network.Flat.LayerCounts[i] / 2;
-                for (int j = 0; j < train.Network.Flat.LayerCounts[i]; j++)
-                {
-
-                    scatterSeries.Points.Add(new ScatterPoint(counter, j - multiplier) { Value = 15 });
-                }
-                counter++;
-
-            }
-            NeuronPlotModel.Series.Add(scatterSeries);
-        }
-
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -147,5 +99,6 @@ namespace ANNA
         public int TypeIndex { get; set; }
         public Double Value { get; set; }
         public int Iteration { get; set; }
+        public double[] InputArray { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Encog.Util.Arrayutil;
 using Newtonsoft.Json;
 
 namespace ANNA
@@ -24,21 +25,35 @@ namespace ANNA
         public List<NetworkLayer> NetworkLayers { get; set; }
         public LearnConfig LearnConfig { get; set; }
         public string FilePath { get; set; }
-        public string TrainedDataPath { get; set; }
+        public string TrainedNormPath { get; set; }
+        public string EvalNormPath { get; set; }
+        public string TrainedNetworkFilePath { get; set; }
+        public string AnalystFilePath { get; set; }
+        public List<NormalizationParams> NormalizationParams { get; set; }
+        public NormalizationAction[] NormalizationActions { get; set; }
+        public bool HasHeaders { get; set; }
 
         public void WriteToFile()
         {
             Directory.CreateDirectory(ConfigurationDirectory);
-            var output = JsonConvert.SerializeObject(this);
+       
             FilePath = String.Format(@"{0}\{1}.{2}", ConfigurationDirectory, Helper.CleanFileName(Name),
                 ConfigurationExtension);
+            TrainedNormPath = String.Format(@"{0}\{1}{2}", ConfigurationDirectory, Helper.CleanFileName(Name), "_Data_Train_Norm.csv");
+            EvalNormPath = String.Format(@"{0}\{1}{2}", ConfigurationDirectory, Helper.CleanFileName(Name), "_Data_Eval_Norm.csv");
+            TrainedNetworkFilePath = String.Format(@"{0}\{1}", ConfigurationDirectory,
+                Helper.CleanFileName(Name) + "_Data_Train.eg");
+            AnalystFilePath = String.Format(@"{0}\{1}", ConfigurationDirectory,
+                Helper.CleanFileName(Name) + "_Data_Analyst.eg");
             var file = new System.IO.StreamWriter(FilePath);
+            var output = JsonConvert.SerializeObject(this);
             file.WriteLine(output);
             file.Close();
-            TrainedDataPath = String.Format(@"{0}\{1}", ConfigurationDirectory,
-                Name + "_" + Helper.CleanFileName(Config.TrainedNetworkFile.Name));
-            File.Delete(TrainedDataPath);
-            File.Copy(Config.TrainedNetworkFile.FullName, TrainedDataPath);
+            Config.NormalizedTrainingFile.CopyTo(TrainedNormPath, true);
+            Config.TrainedNetworkFile.CopyTo(TrainedNetworkFilePath, true);
+            Config.AnalystFile.CopyTo(AnalystFilePath, true);
+
+
         }
 
         public static List<NetworkConfiguration> GetFromFile()
