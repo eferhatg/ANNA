@@ -35,21 +35,7 @@ namespace ANNA.Wins
         private IMLDataSet evalSet;
         private int _epoch;
 
-        public void InitWindow()
-        {
-
-            DelimeterList = new List<Delimeter>()
-            {
-                new Delimeter(){Char = ",",Name = "Virgül"},
-                new Delimeter(){Char = "\t",Name = "Tab"},
-                new Delimeter(){Char = ";",Name = "Noktalı Virgül"},
-                  new Delimeter(){Char = " ",Name = "Boşluk"}
-            };
-            ComboBoxDelimeter.SelectedValuePath = "Char";
-            ComboBoxDelimeter.DisplayMemberPath = "Name";
-            ComboBoxDelimeter.ItemsSource = DelimeterList;
-            ComboBoxDelimeter.SelectedIndex = 0;
-        }
+      
 
         private NetworkConfiguration _nc;
         private bool _plotstart;
@@ -60,7 +46,7 @@ namespace ANNA.Wins
         {
             _nc = nc;
             InitializeComponent();
-            InitWindow();
+    
         }
 
         private void ButtonLoadSourceFile_Click_1(object sender, RoutedEventArgs e)
@@ -70,11 +56,12 @@ namespace ANNA.Wins
                 MessageBox.Show("Lütfen önce bir kaynak dosya seçiniz");
                 return;
             }
-            var delimeter = ComboBoxDelimeter.SelectedValue.ToString();
+           
 
             var fi = new FileInfo(ButtonSelectSourceFile.Tag.ToString());
             fi.CopyTo(Config.EveluateFile.FullName, true);
             Normalize();
+            ButtonAnalyze.IsEnabled = true;
         }
 
         private void ButtonSelectSourceFile_Click(object sender, RoutedEventArgs e)
@@ -85,12 +72,13 @@ namespace ANNA.Wins
             ButtonSelectSourceFile.Tag = fi.FullName;
             ButtonSelectSourceFile.FontWeight = FontWeights.Bold;
             ButtonSelectSourceFile.Foreground = Brushes.Blue;
+            ButtonLoadSourceFile.IsEnabled = true;
 
         }
 
         private void Normalize()
         {
-            var analyst = new EncogAnalyst();
+            analyst = new EncogAnalyst();
             analyst.Load(new FileInfo(_nc.AnalystFilePath));
             var norm = new AnalystNormalizeCSV { ProduceOutputHeaders = false };
             norm.Analyze(Config.EveluateFile, _nc.HasHeaders, CSVFormat.English, analyst);
@@ -107,8 +95,7 @@ namespace ANNA.Wins
         private void AnalyzeData()
         {
             network = (BasicNetwork)EncogDirectoryPersistence.LoadObject(new FileInfo(_nc.TrainedNetworkFilePath));
-            analyst = new EncogAnalyst();
-            analyst.Load(Config.AnalystFile);
+          
             evalSet = EncogUtility.LoadCSV2Memory(_nc.EvalNormPath, network.InputCount, network.OutputCount, false, CSVFormat.English, false);
             _epoch = 0;
             ListValues.Items.Clear();

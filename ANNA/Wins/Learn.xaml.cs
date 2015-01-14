@@ -376,6 +376,17 @@ namespace ANNA.Wins
             norm.Normalize(Config.NormalizedTrainingFile);
             analyst.Save(Config.AnalystFile);
 
+            string correctedAF;
+            using (StreamReader sr = new StreamReader(Config.AnalystFile.FullName))
+            {
+                String line = sr.ReadToEnd();
+                correctedAF = line.Replace("\r\nNCE]\r\n[BALANCE:CONFIG]", "\r\n[BALANCE]\r\n[BALANCE:CONFIG]")
+                               .Replace("\r\nin]\r\ntrain", "\r\n[TASKS:task-train]\r\ntrain");
+
+            }
+
+            File.WriteAllText(Config.AnalystFile.FullName, correctedAF);
+
         }
         private void CreateNetwork()
         {

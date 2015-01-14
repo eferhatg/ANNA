@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Encog.App.Analyst;
 
 namespace ANNA.Wins
 {
@@ -23,12 +24,12 @@ namespace ANNA.Wins
         public Main()
         {
             var testss = NetworkConfiguration.GetFromFile();
-          
+
             InitializeComponent();
             ConfigDataGrid.ItemsSource = testss;
         }
 
-    
+
 
         private void DuzenleLink_Click(object sender, RoutedEventArgs e)
         {
@@ -58,7 +59,23 @@ namespace ANNA.Wins
 
         private void KullanLink_Click(object sender, RoutedEventArgs e)
         {
+            //var nc = ((Hyperlink)sender).DataContext as NetworkConfiguration;
+            //FileInfo fi = new FileInfo(nc.AnalystFilePath);
+            //string newline;
+            //using (StreamReader sr = new StreamReader(nc.AnalystFilePath))
+            //{
+            //    String line = sr.ReadToEnd();
+            //     newline = line.Replace("\r\nNCE]\r\n[BALANCE:CONFIG]", "\r\n[BALANCE]\r\n[BALANCE:CONFIG]")
+            //                    .Replace("\r\nin]\r\ntrain", "\r\n[TASKS:task-train]\r\ntrain");
+             
+            //}
+
+            //File.WriteAllText(nc.AnalystFilePath, newline);
+
+            //var analyst = new EncogAnalyst();
+            //analyst.Load(fi);
             var cf = new Analyze(((Hyperlink)sender).DataContext as NetworkConfiguration);
+
             cf.Show();
         }
 
@@ -70,7 +87,7 @@ namespace ANNA.Wins
 
         private void Window_Activated(object sender, EventArgs e)
         {
-              
+
         }
 
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
